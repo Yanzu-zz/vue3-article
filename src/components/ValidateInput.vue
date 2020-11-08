@@ -2,6 +2,17 @@
   <div class="validate-input-container pb-3">
     <!-- 加个 v-bind="$attrs" 就能处理父组件传入自定义的 attribute 了（记得设置inheritAttrs: false）-->
     <input
+      v-if="tag !== 'textarea'"
+      class="form-control"
+      :class="{ 'is-invalid': inputRef.error }"
+      :value="inputRef.val"
+      @blur="validateInput"
+      @input="updateValue"
+      v-bind="$attrs"
+    />
+
+    <textarea
+      v-else
       class="form-control"
       :class="{ 'is-invalid': inputRef.error }"
       :value="inputRef.val"
@@ -27,11 +38,16 @@ export interface RuleProp {
   message: string
 }
 export type RulesProp = RuleProp[]
+export type TagType = 'input' | 'textarea'
 
 export default defineComponent({
   props: {
     rules: Array as PropType<RulesProp>,
-    modelValue: String
+    modelValue: String,
+    tag: {
+      type: String as PropType<TagType>,
+      default: 'input'
+    }
   },
   inheritAttrs: false,
   setup(props, context) {

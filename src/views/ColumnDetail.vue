@@ -38,10 +38,10 @@ export default defineComponent({
     const route = useRoute()
     const store = useStore<GlobalDataProps>()
     const currentId = +route.params.id
-    const postData = computed(() => store.state.posts).value
-    const column = postData.find((c) => c.id === currentId)
 
-    const list = postData.filter((post) => post.columnId === currentId)
+    // 用 vuex 的 getter 方法简洁复用地获取数据
+    const column = computed(() => store.getters.getColumnById(currentId))
+    const list = computed(() => store.getters.getPostsByCid(currentId))
 
     return {
       column,
