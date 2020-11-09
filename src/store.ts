@@ -1,27 +1,34 @@
-import { createStore } from 'vuex'
-import { testData, testPosts } from './testData'
+import { createStore, Commit } from 'vuex'
+import axios from 'axios'
 
 interface Userrops {
   isLogin: boolean
   name?: string
   id?: number
-  columnId?: number
+  column?: string
+}
+
+interface ImageProps {
+  _id?: string
+  url?: string
+  createdAt?: string
 }
 
 export interface ColumnProps {
-  id: number
+  _id: string
   title: string
-  avatar?: string
+  avatar?: ImageProps
   description: string
 }
 
 export interface PostProps {
-  id: number
+  _id: string
   title: string
-  content: string
-  image?: string
+  excerpt?: string
+  content?: string
+  image?: ImageProps
   createdAt: string
-  columnId: number
+  column: string
 }
 
 export interface GlobalDataProps {
@@ -30,14 +37,20 @@ export interface GlobalDataProps {
   user: Userrops
 }
 
+// 获取数据封装函数，完成重复工作
+const getAndCommit = async(url: string, mutationName: string, commit: Commit) => {
+  const { data } = await axios.get(url)
+  commit(mutationName, data)
+}
+
 const store = createStore<GlobalDataProps>({
   state: {
-    columns: testData,
-    posts: testPosts,
+    columns: [],
+    posts: [],
     user: {
       isLogin: true,
       name: 'Ryann',
-      columnId: 1
+      column: '1'
     }
   },
   mutations: {
@@ -46,22 +59,41 @@ const store = createStore<GlobalDataProps>({
         ...state.user,
         isLogin: true,
         name: 'ryann',
-        columnId: 1
+        column: '1'
       }
     },
     createPost(state, newPost) {
       state.posts.push(newPost)
+    },
+    fetchColumns(state, rawData) {
+      state.columns = rawData.data.list
+    },
+    fetchColumn(state, rawData) {
+      state.columns = [rawData.data]
+    },
+    fetchPosts(state, rawData) {
+      state.posts = rawData.data.list
+    }
+  },
+  actions: {
+    // 获取 Column 列表
+    fetchColumns({ commit }) {
+      getAndCommit('/api/columns', 'fetchColumns', commit)
+    },
+    // 根据 cid 获取指定column信息
+    async fetchColumn({ commit }, cid) {
+      getAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
+    },
+    async fetchPosts({ commit }, cid) {
+      getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
     }
   },
   getters: {
-    biggerColumnsLen(state) {
-      return state.columns.filter(c => c.id > 2).length
+    getColumnById: (state) => (id: string) => {
+      return state.columns.find(c => c._id === id)
     },
-    getColumnById: (state) => (id: number) => {
-      return state.columns.find(c => c.id === id)
-    },
-    getPostsByCid: (state) => (cid: number) => {
-      return state.posts.filter(post => post.columnId === cid)
+    getPostsByCid: (state) => (cid: string) => {
+      return state.posts.filter(post => post.column === cid)
     }
   }
 })

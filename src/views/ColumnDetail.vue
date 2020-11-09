@@ -7,7 +7,7 @@
       <!-- 头像 -->
       <div class="col-3 text-center">
         <img
-          :src="column.avatar"
+          :src="column.avatar.url"
           :alt="column.title"
           class="rounded-circle border w-100"
         />
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import PostList from '../components/PostList.vue'
@@ -37,7 +37,12 @@ export default defineComponent({
   setup() {
     const route = useRoute()
     const store = useStore<GlobalDataProps>()
-    const currentId = +route.params.id
+    const currentId = route.params.id
+
+    onMounted(() => {
+      store.dispatch('fetchColumn', currentId)
+      store.dispatch('fetchPosts', currentId)
+    })
 
     // 用 vuex 的 getter 方法简洁复用地获取数据
     const column = computed(() => store.getters.getColumnById(currentId))
