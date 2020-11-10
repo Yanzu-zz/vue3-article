@@ -19,7 +19,7 @@
     <!-- 已登录，显示个人信息相关的 -->
     <ul v-else class="list-inline mb-0">
       <li class="list-inline-item">
-        <dropdown :title="`你好 ${user.name}`">
+        <dropdown :title="`你好 ${user.nickName}`">
           <dropdown-item>
             <router-link to="/create" class="dropdown-item"
               >新建文章</router-link
@@ -38,16 +38,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
-import { useStore } from 'vuex'
+import { computed, defineComponent, PropType } from 'vue'
 import Dropdown from './Dropdown.vue'
 import DropdownItem from './DropdownItem.vue'
-
-export interface UserProps {
-  isLogin: boolean
-  name?: string
-  id?: number
-}
+import { UserProps } from '../store'
 
 export default defineComponent({
   name: 'GlobalHeader',
@@ -55,12 +49,10 @@ export default defineComponent({
     Dropdown,
     DropdownItem
   },
-  setup() {
-    const store = useStore()
-    const user = computed(() => store.state.user)
-
-    return {
-      user
+  props: {
+    user: {
+      type: Object as PropType<UserProps>,
+      required: true
     }
   }
 })

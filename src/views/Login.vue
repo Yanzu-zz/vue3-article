@@ -68,9 +68,15 @@ export default defineComponent({
 
     const onFormSubmit = (result: boolean) => {
       if (result) {
-        router.push('/')
-        // 执行 store mutations 的 login 方法，把用户数据写入 store
-        store.commit('login')
+        const payload = {
+          email: emailVal.value,
+          password: passwordVal.value
+        }
+
+        store.dispatch('loginAndFetch', payload).then((data) => {
+          console.log(data)
+          router.push('/')
+        })
       }
     }
 

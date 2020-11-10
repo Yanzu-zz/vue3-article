@@ -4,17 +4,18 @@ import store from './store'
 import router from './router'
 import axios from 'axios'
 
-// axios.defaults.baseURL = '/api'
+// 可以在 axios 提供的拦截器里设置全局 请求状态
 axios.interceptors.request.use(config => {
-  config.params = {
-    ...config.params // 在请求时自己添加的参数保留
-    // icode: 'C6A6C4086133360B' // 校验码，如果没有或者过期了就获取不了数据了
-  }
+  store.commit('setLoading', true)
+
   return config
 })
-// axios.get('/api/columns').then(res => {
-//   console.log(res)
-// })
+
+axios.interceptors.response.use(config => {
+  store.commit('setLoading', false)
+
+  return config
+})
 
 const app = createApp(App)
 app.use(router)

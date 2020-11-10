@@ -1,11 +1,12 @@
 import { createStore, Commit } from 'vuex'
 import axios from 'axios'
 
-interface Userrops {
+export interface UserProps {
   isLogin: boolean
-  name?: string
-  id?: number
+  nickName?: string
+  _id?: string
   column?: string
+  email?: string
 }
 
 interface ImageProps {
@@ -32,36 +33,47 @@ export interface PostProps {
 }
 
 export interface GlobalDataProps {
+  token: string
+  loading: boolean
   columns: ColumnProps[]
   posts: PostProps[]
-  user: Userrops
+  user: UserProps
 }
 
 // 获取数据封装函数，完成重复工作
-const getAndCommit = async(url: string, mutationName: string, commit: Commit) => {
+// eslint-disable-next-line
+const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
   const { data } = await axios.get(url)
   commit(mutationName, data)
 }
 
+// post 请求
+// eslint-disable-next-line
+const postAndCommit = async (url: string, mutationName: string, commit: Commit, payload: any) => {
+  const { data } = await axios.post(url, payload)
+  commit(mutationName, data)
+  return data
+}
+
 const store = createStore<GlobalDataProps>({
   state: {
+    token: '',
+    loading: false,
     columns: [],
     posts: [],
     user: {
-      isLogin: true,
-      name: 'Ryann',
-      column: '1'
+      isLogin: false
     }
   },
   mutations: {
-    login(state) {
-      state.user = {
-        ...state.user,
-        isLogin: true,
-        name: 'ryann',
-        column: '1'
-      }
-    },
+    // login(state) {
+    //   state.user = {
+    //     ...state.user,
+    //     isLogin: true,
+    //     name: 'ryann',
+    //     column: '1'
+    //   }
+    // },
     createPost(state, newPost) {
       state.posts.push(newPost)
     },
@@ -73,6 +85,17 @@ const store = createStore<GlobalDataProps>({
     },
     fetchPosts(state, rawData) {
       state.posts = rawData.data.list
+    },
+    setLoading(state, status) {
+      state.loading = status
+    },
+    fetchCurrentUser(state, rawData) {
+      state.user = { isLogin: true, ...rawData }
+    },
+    login(state, rawData) {
+      const { token } = rawData.data
+      state.token = token
+      axios.defaults.headers.common.Authorization = `Bearer ${token}`
     }
   },
   actions: {
@@ -81,11 +104,22 @@ const store = createStore<GlobalDataProps>({
       getAndCommit('/api/columns', 'fetchColumns', commit)
     },
     // 根据 cid 获取指定column信息
-    async fetchColumn({ commit }, cid) {
+    fetchColumn({ commit }, cid) {
       getAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
     },
-    async fetchPosts({ commit }, cid) {
+    fetchPosts({ commit }, cid) {
       getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
+    },
+    fetchCurrentUser({ commit }) {
+      getAndCommit('/api/user/current', 'fetchCurrentUser', commit)
+    },
+    login({ commit }, payload) {
+      return postAndCommit('/api/user/login', 'login', commit, payload)
+    },
+    loginAndFetch({ dispatch }, loginData) { // 登录时要 登录+获取登录的用户信息 两个action
+      return dispatch('login', loginData).then(() => {
+        return dispatch('fetchCurrentUser')
+      })
     }
   },
   getters: {
