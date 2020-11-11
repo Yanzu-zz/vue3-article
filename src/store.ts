@@ -32,7 +32,13 @@ export interface PostProps {
   column: string
 }
 
+export interface GlobalErrorProps {
+  status: boolean
+  message?: string
+}
+
 export interface GlobalDataProps {
+  error: GlobalErrorProps
   token: string
   loading: boolean
   columns: ColumnProps[]
@@ -57,7 +63,8 @@ const postAndCommit = async (url: string, mutationName: string, commit: Commit, 
 
 const store = createStore<GlobalDataProps>({
   state: {
-    token: '',
+    error: { status: false },
+    token: localStorage.getItem('token') || '',
     loading: false,
     columns: [],
     posts: [],
@@ -89,12 +96,16 @@ const store = createStore<GlobalDataProps>({
     setLoading(state, status) {
       state.loading = status
     },
+    setError(state, e: GlobalErrorProps) {
+      state.error = e
+    },
     fetchCurrentUser(state, rawData) {
-      state.user = { isLogin: true, ...rawData }
+      state.user = { isLogin: true, ...rawData.data }
     },
     login(state, rawData) {
       const { token } = rawData.data
       state.token = token
+      localStorage.setItem('token', token)
       axios.defaults.headers.common.Authorization = `Bearer ${token}`
     }
   },
@@ -116,7 +127,7 @@ const store = createStore<GlobalDataProps>({
     login({ commit }, payload) {
       return postAndCommit('/api/user/login', 'login', commit, payload)
     },
-    loginAndFetch({ dispatch }, loginData) { // 登录时要 登录+获取登录的用户信息 两个action
+    loginAndFetch({ dispatch }, loginData) {
       return dispatch('login', loginData).then(() => {
         return dispatch('fetchCurrentUser')
       })

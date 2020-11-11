@@ -3,6 +3,7 @@ import store from './store'
 
 import Home from './views/Home.vue'
 import Login from './views/Login.vue'
+import Signup from './views/Signup.vue'
 import Column from './views/ColumnDetail.vue'
 import CreatePost from './views/CreatePost.vue'
 
@@ -19,6 +20,14 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
+      meta: {
+        redirectAlreadyLogin: true
+      }
+    },
+    {
+      path: '/signup',
+      name: 'sugnup',
+      component: Signup,
       meta: {
         redirectAlreadyLogin: true
       }

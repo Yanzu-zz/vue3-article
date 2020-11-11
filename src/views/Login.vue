@@ -1,40 +1,44 @@
 <template>
-  <!-- Form -->
-  <validate-form @form-submit="onFormSubmit">
-    <div class="mb-3">
-      <label class="form-label">邮箱地址</label>
-      <validate-input
-        type="text"
-        placeholder="请输入登录帐号"
-        :rules="emailRules"
-        v-model="emailVal"
-        ref="inputRef"
-      ></validate-input>
-    </div>
+  <div class="login-page mx-auto p-3 w-330">
+    <h5 class="my-4 text-center">登录到者也</h5>
 
-    <div class="mb-3">
-      <label for="exampleInputPassword1" class="form-label">密码</label>
-      <validate-input
-        type="password"
-        placeholder="请输入密码..."
-        :rules="passwordRules"
-        v-model="passwordVal"
-        ref="inputRef"
-      ></validate-input>
-    </div>
+    <validate-form @form-submit="onFormSubmit">
+      <div class="mb-3">
+        <label class="form-label">邮箱地址</label>
+        <validate-input
+          :rules="emailRules"
+          v-model="emailVal"
+          placeholder="请输入邮箱地址"
+          type="text"
+          ref="inputRef"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">密码</label>
+        <validate-input
+          type="password"
+          placeholder="请输入密码"
+          :rules="passwordRules"
+          v-model="passwordVal"
+        />
+      </div>
 
-    <!-- <template #submit>
-      <span class="btn btn-primary">Submit</span>
-    </template> -->
-  </validate-form>
+      <template #submit>
+        <button type="submit" class="btn btn-primary btn-block btn-large">
+          登录
+        </button>
+      </template>
+    </validate-form>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import ValidateForm from '../components/ValidateForm.vue'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
+import ValidateForm from '../components/ValidateForm.vue'
+import createMessage from '@/components/createMessage'
 
 export default defineComponent({
   name: 'Login',
@@ -43,27 +47,17 @@ export default defineComponent({
     ValidateInput
   },
   setup() {
+    const emailVal = ref('')
     const router = useRouter()
     const store = useStore()
-
-    const emailVal = ref('')
     const emailRules: RulesProp = [
-      {
-        type: 'required',
-        message: '电子邮箱地址不能为空'
-      },
-      {
-        type: 'email',
-        message: '请输入正确的电子邮箱格式'
-      }
+      { type: 'required', message: '电子邮箱地址不能为空' },
+      { type: 'email', message: '请输入正确的电子邮箱格式' }
     ]
 
     const passwordVal = ref('')
     const passwordRules: RulesProp = [
-      {
-        type: 'required',
-        message: '密码不能为空'
-      }
+      { type: 'required', message: '密码不能为空' }
     ]
 
     const onFormSubmit = (result: boolean) => {
@@ -73,16 +67,22 @@ export default defineComponent({
           password: passwordVal.value
         }
 
-        store.dispatch('loginAndFetch', payload).then((data) => {
-          console.log(data)
-          router.push('/')
-        })
+        store
+          .dispatch('loginAndFetch', payload)
+          .then(() => {
+            createMessage('登录成功，2秒后跳转到首页', 'success')
+            setTimeout(() => {
+              router.push('/')
+            }, 2000)
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       }
     }
-
     return {
-      emailVal,
       emailRules,
+      emailVal,
       passwordVal,
       passwordRules,
       onFormSubmit
@@ -90,6 +90,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style>
-</style>

@@ -15,7 +15,8 @@
 </template>
 
 <script>
-import { defineComponent, onUnmounted, ref } from 'vue'
+import { defineComponent, ref } from 'vue'
+import useDOMCreate from '@/hooks/useDOMCreate'
 
 export default defineComponent({
   props: {
@@ -28,15 +29,7 @@ export default defineComponent({
   },
   setup() {
     const nodeName = ref('back')
-    const node = document.createElement('div')
-
-    node.id = nodeName.value
-    document.body.appendChild(node)
-
-    // 添加了的节点记得在卸载时删除掉！！！
-    onUnmounted(() => {
-      document.body.removeChild(node)
-    })
+    useDOMCreate(nodeName.value)
 
     return {
       nodeName

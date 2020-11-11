@@ -18,6 +18,7 @@ export const emitter: Emitter = mitt()
 type ValidateFunc = () => boolean
 
 export default defineComponent({
+  name: 'ValidateForm',
   emits: ['form-submit'],
   setup(props, context) {
     let funcArr: ValidateFunc[] = []

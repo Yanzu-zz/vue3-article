@@ -7,6 +7,7 @@ import axios from 'axios'
 // 可以在 axios 提供的拦截器里设置全局 请求状态
 axios.interceptors.request.use(config => {
   store.commit('setLoading', true)
+  store.commit('setError', { status: false, message: '' })
 
   return config
 })
@@ -15,6 +16,12 @@ axios.interceptors.response.use(config => {
   store.commit('setLoading', false)
 
   return config
+}, e => {
+  const { error } = e.response.data
+  store.commit('setError', { status: true, message: error })
+  store.commit('setLoading', false)
+
+  return Promise.reject(error)
 })
 
 const app = createApp(App)
