@@ -28,7 +28,7 @@ import { computed, defineComponent, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import PostList from '../components/PostList.vue'
-import { GlobalDataProps } from '../store'
+import { GlobalDataProps } from '../types/index'
 
 export default defineComponent({
   components: {

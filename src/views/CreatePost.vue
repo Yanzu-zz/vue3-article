@@ -2,6 +2,22 @@
   <div class="create-post-page">
     <h4>新建文章</h4>
 
+    <uploader
+      action="/api/upload"
+      class="d-flex align-items-center justify-content-center bg-light text-secondary"
+    >
+      <h2>点击上传头图</h2>
+      <template #loading>
+        <div class="d-flex">
+          <div class="spinner-border text-secondary" role="status"></div>
+          <h2>&nbsp;正在上传</h2>
+        </div>
+      </template>
+
+      <template #uploaded="dataProps">
+        <img :src="dataProps.uploadedData.data.url" /> </template
+    ></uploader>
+
     <validate-form @form-submit="onFormSubmit">
       <div class="mb-3">
         <label class="form-label">文章标题：</label>
@@ -24,8 +40,8 @@
       </div>
       <template #submit>
         <button class="btn btn-primary btn-large">发表文章</button>
-      </template>
-    </validate-form>
+      </template></validate-form
+    >
   </div>
 </template>
 
@@ -33,15 +49,18 @@
 import { defineComponent, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { GlobalDataProps, PostProps } from '../store'
+import { GlobalDataProps, PostProps } from '../types/index'
 import ValidateForm from '../components/ValidateForm.vue'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
+import Uploader from '../components/Uploader.vue'
+import createMessage from '@/components/createMessage'
 
 export default defineComponent({
   name: 'CreatePost',
   components: {
     ValidateInput,
-    ValidateForm
+    ValidateForm,
+    Uploader
   },
   setup() {
     const store = useStore<GlobalDataProps>()
@@ -73,6 +92,14 @@ export default defineComponent({
       }
     }
 
+    const beforeUpload = (file: File) => {
+      const isJPG = file.type === 'image/jpeg'
+      if (!isJPG) {
+        createMessage('上传图片只能是 JPG 格式', 'error')
+      }
+      return isJPG
+    }
+
     return {
       titleVal,
       titleRules,
@@ -90,17 +117,21 @@ export default defineComponent({
   cursor: pointer;
   overflow: hidden;
 }
+
 .create-post-page .file-upload-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+
 .uploaded-area {
   position: relative;
 }
+
 .uploaded-area:hover h3 {
   display: block;
 }
+
 .uploaded-area h3 {
   display: none;
   position: absolute;

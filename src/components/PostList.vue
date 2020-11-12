@@ -25,7 +25,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, computed } from 'vue'
-import { PostProps } from '../store'
+import { PostProps } from '../types/index'
 
 export default defineComponent({
   props: {

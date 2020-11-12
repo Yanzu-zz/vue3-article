@@ -38,7 +38,7 @@
 import { defineComponent, PropType } from 'vue'
 import Dropdown from './Dropdown.vue'
 import DropdownItem from './DropdownItem.vue'
-import { UserProps } from '../store'
+import { UserProps } from '../types'
 
 export default defineComponent({
   name: 'GlobalHeader',

@@ -1,56 +1,13 @@
 import { createStore, Commit } from 'vuex'
 import axios from 'axios'
-
-export interface UserProps {
-  isLogin: boolean
-  nickName?: string
-  _id?: string
-  column?: string
-  email?: string
-}
-
-interface ImageProps {
-  _id?: string
-  url?: string
-  createdAt?: string
-}
-
-export interface ColumnProps {
-  _id: string
-  title: string
-  avatar?: ImageProps
-  description: string
-}
-
-export interface PostProps {
-  _id: string
-  title: string
-  excerpt?: string
-  content?: string
-  image?: ImageProps
-  createdAt: string
-  column: string
-}
-
-export interface GlobalErrorProps {
-  status: boolean
-  message?: string
-}
-
-export interface GlobalDataProps {
-  error: GlobalErrorProps
-  token: string
-  loading: boolean
-  columns: ColumnProps[]
-  posts: PostProps[]
-  user: UserProps
-}
+import { GlobalDataProps, GlobalErrorProps } from '../types'
 
 // 获取数据封装函数，完成重复工作
 // eslint-disable-next-line
 const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
   const { data } = await axios.get(url)
   commit(mutationName, data)
+  return data
 }
 
 // post 请求
@@ -107,22 +64,27 @@ const store = createStore<GlobalDataProps>({
       state.token = token
       localStorage.setItem('token', token)
       axios.defaults.headers.common.Authorization = `Bearer ${token}`
+    },
+    logout(state) {
+      state.token = ''
+      localStorage.remove('token')
+      delete axios.defaults.headers.commom.Authorization
     }
   },
   actions: {
     // 获取 Column 列表
     fetchColumns({ commit }) {
-      getAndCommit('/api/columns', 'fetchColumns', commit)
+      return getAndCommit('/api/columns', 'fetchColumns', commit)
     },
     // 根据 cid 获取指定column信息
     fetchColumn({ commit }, cid) {
-      getAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
+      return getAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
     },
     fetchPosts({ commit }, cid) {
-      getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
+      return getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
     },
     fetchCurrentUser({ commit }) {
-      getAndCommit('/api/user/current', 'fetchCurrentUser', commit)
+      return getAndCommit('/api/user/current', 'fetchCurrentUser', commit)
     },
     login({ commit }, payload) {
       return postAndCommit('/api/user/login', 'login', commit, payload)
