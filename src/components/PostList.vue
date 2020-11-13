@@ -3,12 +3,14 @@
     <article v-for="post in posts" :key="post._id" class="card mb-3 shadow-sm">
       <div class="card-body">
         <h4>
-          <a href="#">{{ post.title }}</a>
+          <router-link :to="`/posts/${post._id}/`">{{
+            post.title
+          }}</router-link>
         </h4>
         <div class="row my-3 align-items-center">
           <div v-if="post.image" class="col-4">
             <img
-              :src="post.image.url"
+              :src="post.image.fitUrl"
               :alt="post.title"
               class="rounded-lg w-100"
             />
@@ -25,7 +27,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType, computed } from 'vue'
-import { PostProps } from '../types/index'
+import { PostProps, ImageProps } from '@/types'
+import { generateFitUrl } from '@/helper'
 
 export default defineComponent({
   props: {
@@ -38,11 +41,12 @@ export default defineComponent({
     const posts = computed(() => {
       return props.list.map((post) => {
         if (post.image) {
-          post.image.url += '?x-oss-process=imageresize,m_pad,h_50,w_100'
+          generateFitUrl(post.image as ImageProps, 200, 110, ['m_fill'])
+          return post
         }
-        return post
       })
     })
+
     return {
       posts
     }

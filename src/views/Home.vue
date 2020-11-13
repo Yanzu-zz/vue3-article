@@ -20,7 +20,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { GlobalDataProps, ResponseType, ImageProps } from '../types/index'
+import { GlobalDataProps } from '../types/index'
 import ColumnList from '../components/ColumnList.vue'
 
 export default defineComponent({

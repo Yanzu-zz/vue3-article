@@ -11,12 +11,15 @@ export interface UserProps {
   _id?: string
   column?: string
   email?: string
+  avatar?: ImageProps
+  description?: string
 }
 
 export interface ImageProps {
   _id?: string
   url?: string
   createdAt?: string
+  fitUrl?: string
 }
 
 export interface ColumnProps {
@@ -29,11 +32,13 @@ export interface ColumnProps {
 export interface PostProps {
   _id: string
   title: string
+  createdAt: string
+  column: string | UserProps
   excerpt?: string
   content?: string
-  image?: ImageProps
-  createdAt: string
-  column: string
+  image?: ImageProps | string
+  author?: string
+  isHTML?: boolean
 }
 
 export interface GlobalErrorProps {
@@ -47,5 +52,6 @@ export interface GlobalDataProps {
   loading: boolean
   columns: ColumnProps[]
   posts: PostProps[]
+  post: PostProps
   user: UserProps
 }

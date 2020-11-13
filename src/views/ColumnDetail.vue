@@ -7,7 +7,7 @@
       <!-- 头像 -->
       <div class="col-3 text-center">
         <img
-          :src="column.avatar.url"
+          :src="column.avatar && column.avatar.fitUrl"
           :alt="column.title"
           class="rounded-circle border w-100"
         />
@@ -29,6 +29,7 @@ import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import PostList from '../components/PostList.vue'
 import { GlobalDataProps } from '../types/index'
+import { generateFitUrl } from '@/helper'
 
 export default defineComponent({
   components: {
@@ -45,7 +46,13 @@ export default defineComponent({
     })
 
     // 用 vuex 的 getter 方法简洁复用地获取数据
-    const column = computed(() => store.getters.getColumnById(currentId))
+    const column = computed(() => {
+      const selectColumn = store.getters.getColumnById(currentId)
+      if (selectColumn) {
+        generateFitUrl(selectColumn, 100, 100)
+      }
+      return selectColumn
+    })
     const list = computed(() => store.getters.getPostsByCid(currentId))
 
     return {

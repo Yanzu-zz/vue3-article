@@ -1,6 +1,6 @@
 import { createStore, Commit } from 'vuex'
 import axios from 'axios'
-import { GlobalDataProps, GlobalErrorProps } from '../types'
+import { GlobalDataProps, GlobalErrorProps } from '@/types'
 
 // 获取数据封装函数，完成重复工作
 // eslint-disable-next-line
@@ -25,6 +25,12 @@ const store = createStore<GlobalDataProps>({
     loading: false,
     columns: [],
     posts: [],
+    post: {
+      _id: '',
+      title: '',
+      createdAt: '',
+      column: ''
+    },
     user: {
       isLogin: false
     }
@@ -38,9 +44,6 @@ const store = createStore<GlobalDataProps>({
     //     column: '1'
     //   }
     // },
-    createPost(state, newPost) {
-      state.posts.push(newPost)
-    },
     fetchColumns(state, rawData) {
       state.columns = rawData.data.list
     },
@@ -50,6 +53,9 @@ const store = createStore<GlobalDataProps>({
     fetchPosts(state, rawData) {
       state.posts = rawData.data.list
     },
+    fetchPost(state, rawData) {
+      state.post = rawData.data
+    },
     setLoading(state, status) {
       state.loading = status
     },
@@ -58,6 +64,9 @@ const store = createStore<GlobalDataProps>({
     },
     fetchCurrentUser(state, rawData) {
       state.user = { isLogin: true, ...rawData.data }
+    },
+    createPost(state, newPost) {
+      state.posts.push(newPost)
     },
     login(state, rawData) {
       const { token } = rawData.data
@@ -83,11 +92,17 @@ const store = createStore<GlobalDataProps>({
     fetchPosts({ commit }, cid) {
       return getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
     },
+    fetchPost({ commit }, id) {
+      return getAndCommit(`/api/posts/${id}`, 'fetchPost', commit)
+    },
     fetchCurrentUser({ commit }) {
       return getAndCommit('/api/user/current', 'fetchCurrentUser', commit)
     },
     login({ commit }, payload) {
       return postAndCommit('/api/user/login', 'login', commit, payload)
+    },
+    createPost({ commit }, payload) {
+      return postAndCommit('/api/posts', 'createPost', commit, payload)
     },
     loginAndFetch({ dispatch }, loginData) {
       return dispatch('login', loginData).then(() => {
@@ -101,6 +116,9 @@ const store = createStore<GlobalDataProps>({
     },
     getPostsByCid: (state) => (cid: string) => {
       return state.posts.filter(post => post.column === cid)
+    },
+    getCurrentPost: (state) => (id: string) => {
+      return state.post
     }
   }
 })
