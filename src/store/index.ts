@@ -1,19 +1,25 @@
 import { createStore, Commit } from 'vuex'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { GlobalDataProps, GlobalErrorProps } from '@/types'
 
 // 获取数据封装函数，完成重复工作
 // eslint-disable-next-line
-const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
-  const { data } = await axios.get(url)
-  commit(mutationName, data)
-  return data
-}
+// const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
+//   const { data } = await axios.get(url)
+//   commit(mutationName, data)
+//   return data
+// }
 
 // post 请求
 // eslint-disable-next-line
-const postAndCommit = async (url: string, mutationName: string, commit: Commit, payload: any) => {
-  const { data } = await axios.post(url, payload)
+// const postAndCommit = async (url: string, mutationName: string, commit: Commit, payload: any) => {
+//   const { data } = await axios.post(url, payload)
+//   commit(mutationName, data)
+//   return data
+// }
+
+const asyncAndCommit = async(url: string, mutationName: string, commit: Commit, config: AxiosRequestConfig = { method: 'get' }) => {
+  const { data } = await axios(url, config)
   commit(mutationName, data)
   return data
 }
@@ -53,8 +59,23 @@ const store = createStore<GlobalDataProps>({
     fetchPosts(state, rawData) {
       state.posts = rawData.data.list
     },
+    createPost(state, newPost) {
+      state.posts.push(newPost)
+    },
     fetchPost(state, rawData) {
       state.post = rawData.data
+    },
+    updatePost(state, { data }) {
+      state.posts = state.posts.map(post => {
+        if (post._id === data._id) {
+          return data
+        } else {
+          return post
+        }
+      })
+    },
+    deletePost(state, { data }) {
+      state.posts = state.posts.filter(post => post._id !== data.id)
     },
     setLoading(state, status) {
       state.loading = status
@@ -64,9 +85,6 @@ const store = createStore<GlobalDataProps>({
     },
     fetchCurrentUser(state, rawData) {
       state.user = { isLogin: true, ...rawData.data }
-    },
-    createPost(state, newPost) {
-      state.posts.push(newPost)
     },
     login(state, rawData) {
       const { token } = rawData.data
@@ -83,26 +101,43 @@ const store = createStore<GlobalDataProps>({
   actions: {
     // 获取 Column 列表
     fetchColumns({ commit }) {
-      return getAndCommit('/api/columns', 'fetchColumns', commit)
+      return asyncAndCommit('/api/columns', 'fetchColumns', commit)
     },
     // 根据 cid 获取指定column信息
     fetchColumn({ commit }, cid) {
-      return getAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
+      return asyncAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
     },
     fetchPosts({ commit }, cid) {
-      return getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
-    },
-    fetchPost({ commit }, id) {
-      return getAndCommit(`/api/posts/${id}`, 'fetchPost', commit)
-    },
-    fetchCurrentUser({ commit }) {
-      return getAndCommit('/api/user/current', 'fetchCurrentUser', commit)
-    },
-    login({ commit }, payload) {
-      return postAndCommit('/api/user/login', 'login', commit, payload)
+      return asyncAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
     },
     createPost({ commit }, payload) {
-      return postAndCommit('/api/posts', 'createPost', commit, payload)
+      return asyncAndCommit('/api/posts', 'createPost', commit, {
+        method: 'post',
+        data: payload
+      })
+    },
+    fetchPost({ commit }, id) {
+      return asyncAndCommit(`/api/posts/${id}`, 'fetchPost', commit)
+    },
+    updatePost({ commit }, { id, payload }) {
+      return asyncAndCommit(`/api/posts/${id}`, 'updatePost', commit, {
+        method: 'patch',
+        data: payload
+      })
+    },
+    deletePost({ commit }, id) {
+      return asyncAndCommit(`/api/posts/${id}`, 'deletePost', commit, {
+        method: 'delete'
+      })
+    },
+    fetchCurrentUser({ commit }) {
+      return asyncAndCommit('/api/user/current', 'fetchCurrentUser', commit)
+    },
+    login({ commit }, payload) {
+      return asyncAndCommit('/api/user/login', 'login', commit, {
+        method: 'post',
+        data: payload
+      })
     },
     loginAndFetch({ dispatch }, loginData) {
       return dispatch('login', loginData).then(() => {
@@ -117,7 +152,7 @@ const store = createStore<GlobalDataProps>({
     getPostsByCid: (state) => (cid: string) => {
       return state.posts.filter(post => post.column === cid)
     },
-    getCurrentPost: (state) => (id: string) => {
+    getCurrentPost: (state) => () => {
       return state.post
     }
   }

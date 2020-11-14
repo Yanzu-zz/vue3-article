@@ -37,7 +37,7 @@ export interface PostProps {
   excerpt?: string
   content?: string
   image?: ImageProps | string
-  author?: string
+  author?: string | UserProps
   isHTML?: boolean
 }
 

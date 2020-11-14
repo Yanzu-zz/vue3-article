@@ -1,4 +1,5 @@
 <template>
+  <!-- 弹出层确认框 -->
   <teleport to="#modal">
     <div class="modal d-block" tabindex="-1" v-if="visible">
       <div class="modal-dialog">
@@ -14,9 +15,11 @@
               <span aria-hidden="true" @click="onClose">&times;</span>
             </button>
           </div>
+
           <div class="modal-body">
             <slot></slot>
           </div>
+
           <div class="modal-footer">
             <button
               type="button"
@@ -24,10 +27,10 @@
               data-dismiss="modal"
               @click="onClose"
             >
-              取消
+              {{ cancellationText }}
             </button>
             <button type="button" class="btn btn-primary" @click="onConfirm">
-              确定
+              {{ confirmationText }}
             </button>
           </div>
         </div>
@@ -47,17 +50,27 @@ export default defineComponent({
     visible: {
       type: Boolean,
       default: false
+    },
+    confirmationText: {
+      type: String,
+      default: '确认'
+    },
+    cancellationText: {
+      type: String,
+      default: '取消'
     }
   },
   emits: ['modal-on-close', 'modal-on-confirm'],
   setup(props, context) {
     useDOMCreate('modal')
+
     const onClose = () => {
       context.emit('modal-on-close')
     }
     const onConfirm = () => {
       context.emit('modal-on-confirm')
     }
+
     return {
       onClose,
       onConfirm
