@@ -6,6 +6,7 @@ import axios from 'axios'
 
 // 可以在 axios 提供的拦截器里设置全局 请求状态
 axios.interceptors.request.use(config => {
+  // 请求时设置全局 loading 状态
   store.commit('setLoading', true)
   store.commit('setError', { status: false, message: '' })
 
@@ -13,6 +14,7 @@ axios.interceptors.request.use(config => {
 })
 
 axios.interceptors.response.use(config => {
+  // 解除 loading 状态
   store.commit('setLoading', false)
 
   return config

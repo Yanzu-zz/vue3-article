@@ -41,17 +41,20 @@ export interface PostProps {
   isHTML?: boolean
 }
 
+interface ListProps<P> {
+  [id: string]: P
+}
+
 export interface GlobalErrorProps {
   status: boolean
   message?: string
 }
 
 export interface GlobalDataProps {
-  error: GlobalErrorProps
   token: string
+  error: GlobalErrorProps
   loading: boolean
-  columns: ColumnProps[]
-  posts: PostProps[]
-  post: PostProps
+  columns: ListProps<ColumnProps>
+  posts: ListProps<PostProps>
   user: UserProps
 }

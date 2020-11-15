@@ -1,6 +1,7 @@
 import { createStore, Commit } from 'vuex'
 import axios, { AxiosRequestConfig } from 'axios'
 import { GlobalDataProps, GlobalErrorProps } from '@/types'
+import { arrToObj, objToArr } from '@/helper'
 
 // 获取数据封装函数，完成重复工作
 // eslint-disable-next-line
@@ -29,14 +30,8 @@ const store = createStore<GlobalDataProps>({
     error: { status: false },
     token: localStorage.getItem('token') || '',
     loading: false,
-    columns: [],
-    posts: [],
-    post: {
-      _id: '',
-      title: '',
-      createdAt: '',
-      column: ''
-    },
+    columns: {},
+    posts: {},
     user: {
       isLogin: false
     }
@@ -51,31 +46,25 @@ const store = createStore<GlobalDataProps>({
     //   }
     // },
     fetchColumns(state, rawData) {
-      state.columns = rawData.data.list
+      state.columns = arrToObj(rawData.data.list)
     },
     fetchColumn(state, rawData) {
-      state.columns = [rawData.data]
+      state.columns[rawData.data._id] = rawData.data
     },
     fetchPosts(state, rawData) {
-      state.posts = rawData.data.list
+      state.posts = arrToObj(rawData.data.list)
     },
     createPost(state, newPost) {
-      state.posts.push(newPost)
+      state.posts[newPost._id] = newPost
     },
     fetchPost(state, rawData) {
-      state.post = rawData.data
+      state.posts[rawData.data._id] = rawData.data
     },
     updatePost(state, { data }) {
-      state.posts = state.posts.map(post => {
-        if (post._id === data._id) {
-          return data
-        } else {
-          return post
-        }
-      })
+      state.posts[data._id] = data
     },
     deletePost(state, { data }) {
-      state.posts = state.posts.filter(post => post._id !== data.id)
+      delete state.posts[data._id]
     },
     setLoading(state, status) {
       state.loading = status
@@ -146,14 +135,17 @@ const store = createStore<GlobalDataProps>({
     }
   },
   getters: {
+    getColumns: (state) => {
+      return objToArr(state.columns)
+    },
     getColumnById: (state) => (id: string) => {
-      return state.columns.find(c => c._id === id)
+      return state.columns[id]
     },
     getPostsByCid: (state) => (cid: string) => {
-      return state.posts.filter(post => post.column === cid)
+      return objToArr(state.posts).filter(post => post.column === cid)
     },
-    getCurrentPost: (state) => () => {
-      return state.post
+    getCurrentPost: (state) => (id: string) => {
+      return state.posts[id]
     }
   }
 })
