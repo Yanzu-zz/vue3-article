@@ -2,13 +2,8 @@
   <div class="container-lg">
     <global-header :user="currentUser"></global-header>
     <loader v-if="isLoading"></loader>
-    <!-- 用函数式提醒信息 -->
-    <!-- <message
-      type="error"
-      :message="error.message"
-      v-if="error.status"
-    ></message>
- -->
+
+    <!-- 路由变化展示的页面 -->
     <router-view></router-view>
 
     <footer class="text-center py-4 text-secondary bg-light mt-6">
@@ -65,6 +60,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style>
-</style>

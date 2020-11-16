@@ -3,7 +3,7 @@
     <modal
       title="删除文章"
       :visible="modalIsVisible"
-      @modal-on-close="modalIsVisible = false"
+      @modal-on-close="isRevealModal"
       @modal-on-confirm="hideAndDelete"
     >
       <p>确定要删除这篇文章吗？</p>
@@ -45,7 +45,7 @@
         <button
           type="button"
           class="btn btn-danger"
-          @click.prevent="modalIsVisible = true"
+          @click.prevent="isRevealModal(true)"
         >
           删除
         </button>
@@ -124,8 +124,12 @@ export default defineComponent({
       }
     })
 
+    const isRevealModal = (isReveal = false) => {
+      modalIsVisible.value = isReveal
+    }
+
     const hideAndDelete = () => {
-      modalIsVisible.value = false
+      isRevealModal()
       store
         .dispatch('deletePost', currentId)
         .then((rawData: ResponseType<PostProps>) => {
@@ -146,6 +150,7 @@ export default defineComponent({
       currentHTML,
       showEditArea,
       modalIsVisible,
+      isRevealModal,
       hideAndDelete
     }
   }

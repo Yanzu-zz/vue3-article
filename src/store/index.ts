@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createStore, Commit } from 'vuex'
 import axios, { AxiosRequestConfig } from 'axios'
 import { GlobalDataProps, GlobalErrorProps } from '@/types'
@@ -19,10 +20,20 @@ import { arrToObj, objToArr } from '@/helper'
 //   return data
 // }
 
-const asyncAndCommit = async(url: string, mutationName: string, commit: Commit, config: AxiosRequestConfig = { method: 'get' }) => {
+const asyncAndCommit = async (
+  url: string,
+  mutationName: string,
+  commit: Commit,
+  config: AxiosRequestConfig = { method: 'get' },
+  extraData?: any // 可以让 actions 给 mutaions 传递额外信息
+) => {
   const { data } = await axios(url, config)
-  commit(mutationName, data)
-  return data
+  if (extraData) {
+    commit(mutationName, { data, extraData })
+  } else {
+    commit(mutationName, data)
+    return data
+  }
 }
 
 const store = createStore<GlobalDataProps>({
@@ -30,41 +41,48 @@ const store = createStore<GlobalDataProps>({
     error: { status: false },
     token: localStorage.getItem('token') || '',
     loading: false,
-    columns: {},
-    posts: {},
+    columns: {
+      data: {},
+      currentPage: 0,
+      total: 0
+    },
+    posts: {
+      data: {},
+      loadedColumns: []
+    },
     user: {
       isLogin: false
     }
   },
   mutations: {
-    // login(state) {
-    //   state.user = {
-    //     ...state.user,
-    //     isLogin: true,
-    //     name: 'ryann',
-    //     column: '1'
-    //   }
-    // },
     fetchColumns(state, rawData) {
-      state.columns = arrToObj(rawData.data.list)
+      const { data } = state.columns
+      const { list, count, currentPage } = rawData.data
+      state.columns = {
+        data: { ...data, ...arrToObj(list) },
+        total: count,
+        currentPage: currentPage * 1
+      }
     },
     fetchColumn(state, rawData) {
-      state.columns[rawData.data._id] = rawData.data
+      state.columns.data[rawData.data._id] = rawData.data
     },
-    fetchPosts(state, rawData) {
-      state.posts = arrToObj(rawData.data.list)
-    },
-    createPost(state, newPost) {
-      state.posts[newPost._id] = newPost
+    fetchPosts(state, { data: rawData, extraData: columnId }) {
+      // 要让新的数据和旧的数据共存，而不是覆盖
+      state.posts.data = { ...state.posts.data, ...arrToObj(rawData.data.list) }
+      state.posts.loadedColumns.push(columnId)
     },
     fetchPost(state, rawData) {
-      state.posts[rawData.data._id] = rawData.data
+      state.posts.data[rawData.data._id] = rawData.data
+    },
+    createPost(state, newPost) {
+      state.posts.data[newPost._id] = newPost
     },
     updatePost(state, { data }) {
-      state.posts[data._id] = data
+      state.posts.data[data._id] = data
     },
     deletePost(state, { data }) {
-      delete state.posts[data._id]
+      delete state.posts.data[data._id]
     },
     setLoading(state, status) {
       state.loading = status
@@ -89,24 +107,36 @@ const store = createStore<GlobalDataProps>({
   },
   actions: {
     // 获取 Column 列表
-    fetchColumns({ commit }) {
-      return asyncAndCommit('/api/columns', 'fetchColumns', commit)
+    fetchColumns({ state, commit }, params = {}) {
+      const { currentPage = 1, pageSize = 6 } = params
+      if (state.columns.currentPage < currentPage) {
+        return asyncAndCommit(`/api/columns?currentPage=${currentPage}&pageSize=${pageSize}`, 'fetchColumns', commit)
+      }
     },
     // 根据 cid 获取指定column信息
-    fetchColumn({ commit }, cid) {
-      return asyncAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
+    fetchColumn({ state, commit }, cid) {
+      if (!state.columns.data[cid]) {
+        return asyncAndCommit(`/api/columns/${cid}`, 'fetchColumn', commit)
+      }
     },
-    fetchPosts({ commit }, cid) {
-      return asyncAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
+    fetchPosts({ state, commit }, cid) {
+      if (!state.posts.loadedColumns.includes(cid)) {
+        return asyncAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit, { method: 'get' }, cid)
+      }
+    },
+    fetchPost({ state, commit }, id) {
+      const currentPost = state.posts.data[id]
+      if (!currentPost || !currentPost.content) {
+        return asyncAndCommit(`/api/posts/${id}`, 'fetchPost', commit)
+      } else {
+        return Promise.resolve({ data: currentPost })
+      }
     },
     createPost({ commit }, payload) {
       return asyncAndCommit('/api/posts', 'createPost', commit, {
         method: 'post',
         data: payload
       })
-    },
-    fetchPost({ commit }, id) {
-      return asyncAndCommit(`/api/posts/${id}`, 'fetchPost', commit)
     },
     updatePost({ commit }, { id, payload }) {
       return asyncAndCommit(`/api/posts/${id}`, 'updatePost', commit, {
@@ -136,16 +166,16 @@ const store = createStore<GlobalDataProps>({
   },
   getters: {
     getColumns: (state) => {
-      return objToArr(state.columns)
+      return objToArr(state.columns.data)
     },
     getColumnById: (state) => (id: string) => {
-      return state.columns[id]
+      return state.columns.data[id]
     },
     getPostsByCid: (state) => (cid: string) => {
-      return objToArr(state.posts).filter(post => post.column === cid)
+      return objToArr(state.posts.data).filter(post => post.column === cid)
     },
     getCurrentPost: (state) => (id: string) => {
-      return state.posts[id]
+      return state.posts.data[id]
     }
   }
 })

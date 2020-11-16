@@ -42,8 +42,8 @@ export default defineComponent({
       return props.list.map((post) => {
         if (post.image) {
           generateFitUrl(post.image as ImageProps, 200, 110, ['m_fill'])
-          return post
         }
+        return post
       })
     })
 

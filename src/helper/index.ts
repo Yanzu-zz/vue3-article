@@ -47,12 +47,11 @@ export function beforeUploadCheck(file: File, condition: CheckCondition) {
 }
 
 // 数组转 hashmap 数据结构
-export const arrToObj = <T extends { _id: string }>(arr: Array<T>) => {
+export const arrToObj = <T extends { _id?: string }>(arr: Array<T>) => {
   return arr.reduce((prev, current) => {
     if (current._id) {
       prev[current._id] = current
     }
-
     return prev
   }, {} as { [key: string]: T })
 }

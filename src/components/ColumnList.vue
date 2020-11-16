@@ -23,6 +23,7 @@
 </template>
 
 <script lang="ts">
+import { addColumnAvatar } from '@/helper'
 import { computed, defineComponent, PropType } from 'vue'
 import { ColumnProps } from '../types'
 
@@ -39,14 +40,7 @@ export default defineComponent({
   setup(props) {
     const columnList = computed(() => {
       return props.list.map((column) => {
-        if (!column.avatar) {
-          column.avatar = {
-            url: require('@/assets/column.jpg')
-          }
-        } else {
-          column.avatar.url += '?x-oss-process=imageresize,m_pad,h_50,w_50'
-        }
-
+        addColumnAvatar(column, 50, 50)
         return column
       })
     })
