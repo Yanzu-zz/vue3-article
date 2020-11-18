@@ -20,7 +20,7 @@ export function addColumnAvatar(data: ColumnProps | UserProps, width: number, he
   }
 }
 
-interface CheckCondition {
+export interface CheckCondition {
   format?: string[]
   size?: number
 }
