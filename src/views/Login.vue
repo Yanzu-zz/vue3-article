@@ -6,11 +6,10 @@
       <div class="mb-3">
         <label class="form-label">邮箱地址</label>
         <validate-input
-          :rules="emailRules"
-          v-model="emailVal"
-          placeholder="请输入邮箱地址"
           type="text"
-          ref="inputRef"
+          placeholder="请输入邮箱地址"
+          v-model="emailVal"
+          :rules="emailRules"
         />
       </div>
       <div class="mb-3">
@@ -18,8 +17,8 @@
         <validate-input
           type="password"
           placeholder="请输入密码"
-          :rules="passwordRules"
           v-model="passwordVal"
+          :rules="passwordRules"
         />
       </div>
 
@@ -47,9 +46,10 @@ export default defineComponent({
     ValidateInput
   },
   setup() {
-    const emailVal = ref('')
     const router = useRouter()
     const store = useStore()
+
+    const emailVal = ref('')
     const emailRules: RulesProp = [
       { type: 'required', message: '电子邮箱地址不能为空' },
       { type: 'email', message: '请输入正确的电子邮箱格式' }
@@ -80,6 +80,7 @@ export default defineComponent({
           })
       }
     }
+
     return {
       emailRules,
       emailVal,

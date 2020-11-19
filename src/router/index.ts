@@ -8,6 +8,7 @@ import Signup from '@/views/Signup.vue'
 import Column from '@/views/ColumnDetail.vue'
 import CreatePost from '@/views/CreatePost.vue'
 import PostDetail from '@/views/PostDetail.vue'
+import EditInfo from '@/views/EditInfo.vue'
 
 const routerHistory = createWebHistory()
 const router = createRouter({
@@ -32,6 +33,14 @@ const router = createRouter({
       component: Signup,
       meta: {
         redirectAlreadyLogin: true
+      }
+    },
+    {
+      path: '/edit',
+      name: 'edit',
+      component: EditInfo,
+      meta: {
+        requiredLogin: true
       }
     },
     {

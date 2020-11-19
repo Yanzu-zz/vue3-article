@@ -20,6 +20,9 @@ import { arrToObj, objToArr } from '@/helper'
 //   return data
 // }
 
+
+const TOKEN_LOGIN = 'token'
+
 const asyncAndCommit = async (
   url: string,
   mutationName: string,
@@ -55,6 +58,12 @@ const store = createStore<GlobalDataProps>({
     }
   },
   mutations: {
+    fetchCurrentUser(state, rawData) {
+      state.user = { isLogin: true, ...rawData.data }
+    },
+    updateCurrentUser(state, rawData) {
+      state.user = { isLogin: true, ...rawData.data }
+    },
     fetchColumns(state, rawData) {
       const { data } = state.columns
       const { list, count, currentPage } = rawData.data
@@ -90,22 +99,29 @@ const store = createStore<GlobalDataProps>({
     setError(state, e: GlobalErrorProps) {
       state.error = e
     },
-    fetchCurrentUser(state, rawData) {
-      state.user = { isLogin: true, ...rawData.data }
-    },
     login(state, rawData) {
       const { token } = rawData.data
       state.token = token
-      localStorage.setItem('token', token)
+      localStorage.setItem(TOKEN_LOGIN, token)
       axios.defaults.headers.common.Authorization = `Bearer ${token}`
     },
     logout(state) {
       state.token = ''
-      localStorage.remove('token')
-      delete axios.defaults.headers.commom.Authorization
+      state.user = { isLogin: false }
+      localStorage.removeItem(TOKEN_LOGIN)
+      delete axios.defaults.headers.common.Authorization
     }
   },
   actions: {
+    fetchCurrentUser({ commit }) {
+      return asyncAndCommit('/api/user/current', 'fetchCurrentUser', commit)
+    },
+    updateCurrentUser({ commit }, { userId, payload }) {
+      return asyncAndCommit(`/api/user/${userId}`, 'updateCurrentUser', commit, {
+        method: 'patch',
+        data: payload
+      })
+    },
     // 获取 Column 列表
     fetchColumns({ state, commit }, params = {}) {
       const { currentPage = 1, pageSize = 6 } = params
@@ -149,9 +165,6 @@ const store = createStore<GlobalDataProps>({
         method: 'delete'
       })
     },
-    fetchCurrentUser({ commit }) {
-      return asyncAndCommit('/api/user/current', 'fetchCurrentUser', commit)
-    },
     login({ commit }, payload) {
       return asyncAndCommit('/api/user/login', 'login', commit, {
         method: 'post',
@@ -162,6 +175,9 @@ const store = createStore<GlobalDataProps>({
       return dispatch('login', loginData).then(() => {
         return dispatch('fetchCurrentUser')
       })
+    },
+    logout({ commit }) {
+      commit('logout')
     }
   },
   getters: {

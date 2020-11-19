@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar navbar-dark bg-primary justify-content-between mb-4 px-4">
-    <router-link class="navbar-brand" to="/">者也专栏</router-link>
+    <router-link class="navbar-brand" to="/">>_专栏</router-link>
     <ul v-if="!user.isLogin" class="list-inline mb-0">
       <li class="list-inline-item">
         <router-link to="/login" class="btn btn-outline-light my-2"
@@ -28,10 +28,14 @@
             ></dropdown-item
           >
           <dropdown-item
-            ><a href="#" class="dropdown-item">编辑资料</a></dropdown-item
-          >
+            ><router-link to="/edit" class="dropdown-item"
+              >编辑资料</router-link
+            >
+          </dropdown-item>
           <dropdown-item
-            ><a href="#" class="dropdown-item">退出登陆</a></dropdown-item
+            ><a href="#" class="dropdown-item" @click.prevent="logout"
+              >退出登陆</a
+            ></dropdown-item
           >
         </dropdown>
       </li>
@@ -41,9 +45,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import Dropdown from './Dropdown.vue'
 import DropdownItem from './DropdownItem.vue'
 import { UserProps } from '../types'
+import createMessage from './createMessage'
 
 export default defineComponent({
   name: 'GlobalHeader',
@@ -55,6 +62,23 @@ export default defineComponent({
     user: {
       type: Object as PropType<UserProps>,
       required: true
+    }
+  },
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+
+    const logout = () => {
+      store.dispatch('logout').then(() => {
+        createMessage('退出登录成功', 'success', 1000)
+        setTimeout(() => {
+          router.push({ name: 'login' })
+        }, 1000)
+      })
+    }
+
+    return {
+      logout
     }
   }
 })
