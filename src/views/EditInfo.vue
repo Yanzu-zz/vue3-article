@@ -108,7 +108,7 @@ export default defineComponent({
       activedIndex: 0
     })
 
-    const changeTab = (index) => {
+    const changeTab = (index: number) => {
       tabData.activedIndex = index
     }
 
