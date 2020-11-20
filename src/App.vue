@@ -21,9 +21,9 @@
 </template>
 
 <script lang="ts">
+import 'bootstrap/dist/css/bootstrap.min.css' // bootstrap yyds
 import { computed, defineComponent, watch } from 'vue'
 import { useStore } from 'vuex'
-import 'bootstrap/dist/css/bootstrap.min.css' // bootstrap yyds
 import GlobalHeader from './components/GlobalHeader.vue'
 import { GlobalDataProps } from './types/index'
 import Loader from './components/Loader.vue'

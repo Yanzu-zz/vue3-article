@@ -18,7 +18,6 @@
 #### 代码基础架构说明
 
 ``` 
-
 |-- 根目录
     |-- dist 项目 build 之后的文件夹
     |-- public 项目静态资源，不经过 webpack，以及默认的模版，适合存放第三方压缩好的资源
@@ -86,21 +85,17 @@
 ## 安装依赖
 
 ``` 
-
 npm install
 ```
 
 ### 开发模式
 
 ``` 
-
 npm run serve
 ```
-
 ### 生产环境
 
 ``` 
-
 npm run build
 ```
 
@@ -109,7 +104,6 @@ npm run build
 * helper 模块常规单元测试
 
 ``` 
-
 npm run test:unit
 ```
 
